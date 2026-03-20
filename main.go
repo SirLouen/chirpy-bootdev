@@ -12,6 +12,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"example.com/m/v2/internal/auth"
 	"example.com/m/v2/internal/database"
 	"github.com/google/uuid"
 	"github.com/joho/godotenv"
@@ -29,6 +30,7 @@ type User struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 	Email     string    `json:"email"`
+	Password  string    `json:"password,omitempty"`
 }
 
 type Chirp struct {
@@ -165,7 +167,20 @@ func (cfg *apiConfig) postUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := cfg.db.CreateUser(r.Context(), req.Email)
+	password, err := auth.HashPassword(req.Password)
+	if err != nil {
+		log.Printf("Failed to hash password: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"error":"Failed to hash password"}`))
+		return
+	}
+
+	params := database.CreateUserParams{
+		Email:          req.Email,
+		HashedPassword: password,
+	}
+
+	user, err := cfg.db.CreateUser(r.Context(), params)
 	if err != nil {
 		log.Printf("Failed to create user: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
