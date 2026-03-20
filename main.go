@@ -84,6 +84,32 @@ func (cfg *apiConfig) getChirpsHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+func (cfg *apiConfig) getChirpHandler(w http.ResponseWriter, r *http.Request) {
+	chirpID, err := uuid.Parse(r.PathValue("chirpID"))
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(`{"error":"Invalid chirp ID"}`))
+		return
+	}
+
+	chirp, err := cfg.db.GetChirpByID(r.Context(), chirpID)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte(`{"error":"Chirp not found"}`))
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(Chirp{
+		ID:        chirp.ID,
+		CreatedAt: chirp.CreatedAt.Time,
+		UpdatedAt: chirp.UpdatedAt.Time,
+		UserID:    chirp.UserID,
+		Body:      chirp.Body,
+	})
+}
+
 func (cfg *apiConfig) postChirpHandler(w http.ResponseWriter, r *http.Request) {
 	type request Chirp
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -185,6 +211,7 @@ func main() {
 	mux.HandleFunc("POST "+apiRoute+"users", apiCfg.postUserHandler)
 	mux.HandleFunc("POST "+apiRoute+"chirps", apiCfg.postChirpHandler)
 	mux.HandleFunc("GET "+apiRoute+"chirps", apiCfg.getChirpsHandler)
+	mux.HandleFunc("GET /api/chirps/{chirpID}", apiCfg.getChirpHandler)
 
 	// Admin routes
 	mux.Handle("POST "+adminRoute+"reset", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
