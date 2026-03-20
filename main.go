@@ -58,6 +58,32 @@ func cleanProfanity(body string) string {
 	return strings.Join(words, " ")
 }
 
+func (cfg *apiConfig) getChirpsHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
+	chirps, err := cfg.db.GetAllChirps(r.Context())
+	if err != nil {
+		log.Printf("Failed to get chirps: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"error":"Failed to get chirps"}`))
+		return
+	}
+
+	response := make([]Chirp, len(chirps))
+	for i, chirp := range chirps {
+		response[i] = Chirp{
+			ID:        chirp.ID,
+			CreatedAt: chirp.CreatedAt.Time,
+			UpdatedAt: chirp.UpdatedAt.Time,
+			UserID:    chirp.UserID,
+			Body:      chirp.Body,
+		}
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
+}
+
 func (cfg *apiConfig) postChirpHandler(w http.ResponseWriter, r *http.Request) {
 	type request Chirp
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -158,6 +184,7 @@ func main() {
 	})
 	mux.HandleFunc("POST "+apiRoute+"users", apiCfg.postUserHandler)
 	mux.HandleFunc("POST "+apiRoute+"chirps", apiCfg.postChirpHandler)
+	mux.HandleFunc("GET "+apiRoute+"chirps", apiCfg.getChirpsHandler)
 
 	// Admin routes
 	mux.Handle("POST "+adminRoute+"reset", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
