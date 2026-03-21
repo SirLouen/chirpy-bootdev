@@ -54,8 +54,21 @@ func (cfg *apiConfig) loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondWithJSON(w, http.StatusOK, map[string]string{
-		"token":         accessToken,
-		"refresh_token": refreshToken.Token.String(),
+	type response struct {
+		User
+		Token        string `json:"token"`
+		RefreshToken string `json:"refresh_token"`
+	}
+
+	respondWithJSON(w, http.StatusOK, response{
+		Token:        accessToken,
+		RefreshToken: refreshToken.Token.String(),
+		User: User{
+			ID:          user.ID,
+			CreatedAt:   user.CreatedAt,
+			UpdatedAt:   user.UpdatedAt,
+			Email:       user.Email,
+			IsChirpyRed: user.IsChirpyRed,
+		},
 	})
 }

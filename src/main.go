@@ -57,9 +57,12 @@ func main() {
 	mux.HandleFunc("POST "+apiRoute+"users", apiCfg.handlerUsersCreate)
 	mux.HandleFunc("PUT "+apiRoute+"users", apiCfg.handlerUsersUpdate)
 
+	mux.HandleFunc("POST "+apiRoute+"polka/webhooks", apiCfg.handlerPolkaWebhooks)
+
 	mux.HandleFunc("POST "+apiRoute+"chirps", apiCfg.handlerChirpsCreate)
 	mux.HandleFunc("GET "+apiRoute+"chirps", apiCfg.handlerChirpsRead)
 	mux.HandleFunc("GET "+apiRoute+"chirps/{chirpID}", apiCfg.handlerChirpRead)
+	mux.HandleFunc("DELETE "+apiRoute+"chirps/{chirpID}", apiCfg.handlerChirpDelete)
 
 	mux.HandleFunc("POST "+apiRoute+"login", apiCfg.loginHandler)
 	mux.HandleFunc("POST "+apiRoute+"refresh", apiCfg.refreshHandler)

@@ -19,3 +19,9 @@ SELECT * FROM users WHERE email = $1;
 UPDATE users SET email = $2, hashed_password = $3, updated_at = NOW()
 WHERE id = $1
 RETURNING *;
+
+-- name: MarkUserChirpsAsRed :exec
+UPDATE users
+SET is_chirpy_red = TRUE, updated_at = NOW()
+WHERE id = $1;
+RETURNING *;

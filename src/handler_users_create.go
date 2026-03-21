@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 
 	"github.com/SirLouen/chirpy-bootdev/src/auth"
@@ -15,21 +14,17 @@ func (cfg *apiConfig) handlerUsersCreate(w http.ResponseWriter, r *http.Request)
 
 	var req request
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(`{"error":"Invalid request body"}`))
+		respondWithError(w, http.StatusBadRequest, "Invalid request body", err)
 		return
 	}
 	if req.Email == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(`{"error":"Email is required"}`))
+		respondWithError(w, http.StatusBadRequest, "Email is required", nil)
 		return
 	}
 
 	password, err := auth.HashPassword(req.Password)
 	if err != nil {
-		log.Printf("Failed to hash password: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`{"error":"Failed to hash password"}`))
+		respondWithError(w, http.StatusInternalServerError, "Failed to hash password", err)
 		return
 	}
 
@@ -40,17 +35,15 @@ func (cfg *apiConfig) handlerUsersCreate(w http.ResponseWriter, r *http.Request)
 
 	user, err := cfg.db.CreateUser(r.Context(), params)
 	if err != nil {
-		log.Printf("Failed to create user: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`{"error":"Failed to create user"}`))
+		respondWithError(w, http.StatusInternalServerError, "Failed to create user", err)
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(User{
-		ID:        user.ID,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
-		Email:     user.Email,
+	respondWithJSON(w, http.StatusCreated, User{
+		ID:          user.ID,
+		CreatedAt:   user.CreatedAt,
+		UpdatedAt:   user.UpdatedAt,
+		Email:       user.Email,
+		IsChirpyRed: user.IsChirpyRed,
 	})
 }
