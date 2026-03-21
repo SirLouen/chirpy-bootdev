@@ -31,6 +31,10 @@ func main() {
 	if secret == "" {
 		log.Fatal("SECRET must be set")
 	}
+	polkaKey := os.Getenv("POLKA_KEY")
+	if polkaKey == "" {
+		log.Fatal("POLKA_KEY must be set")
+	}
 
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
@@ -45,6 +49,7 @@ func main() {
 		platform:       platform,
 		fileserverHits: atomic.Int32{},
 		secret:         secret,
+		polkaKey:       polkaKey,
 	}
 	mux := http.NewServeMux()
 
@@ -57,7 +62,7 @@ func main() {
 	mux.HandleFunc("POST "+apiRoute+"users", apiCfg.handlerUsersCreate)
 	mux.HandleFunc("PUT "+apiRoute+"users", apiCfg.handlerUsersUpdate)
 
-	mux.HandleFunc("POST "+apiRoute+"polka/webhooks", apiCfg.handlerPolkaWebhooks)
+	mux.HandleFunc("POST "+apiRoute+"polka/webhooks", apiCfg.handlerPolkaWebhook)
 
 	mux.HandleFunc("POST "+apiRoute+"chirps", apiCfg.handlerChirpsCreate)
 	mux.HandleFunc("GET "+apiRoute+"chirps", apiCfg.handlerChirpsRead)
