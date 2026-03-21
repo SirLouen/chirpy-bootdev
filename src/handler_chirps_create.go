@@ -7,14 +7,25 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/SirLouen/chirpy-bootdev/src/auth"
 	"github.com/SirLouen/chirpy-bootdev/src/database"
-	"github.com/google/uuid"
 )
 
 func (cfg *apiConfig) handlerChirpsCreate(w http.ResponseWriter, r *http.Request) {
+	token, err := auth.GetBearerToken(r)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Unauthorized", err)
+		return
+	}
+
+	userID, err := auth.ValidateJWT(token, cfg.secret)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Unauthorized", err)
+		return
+	}
+
 	type parameters struct {
-		Body   string    `json:"body"`
-		UserID uuid.UUID `json:"user_id"`
+		Body string `json:"body"`
 	}
 
 	req := parameters{}
@@ -23,8 +34,8 @@ func (cfg *apiConfig) handlerChirpsCreate(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	if req.Body == "" || req.UserID == uuid.Nil {
-		respondWithError(w, http.StatusBadRequest, "Body and UserID are required", nil)
+	if req.Body == "" {
+		respondWithError(w, http.StatusBadRequest, "Body is required", nil)
 		return
 	}
 
@@ -36,7 +47,7 @@ func (cfg *apiConfig) handlerChirpsCreate(w http.ResponseWriter, r *http.Request
 
 	chirp, err := cfg.db.CreateChirp(r.Context(), database.CreateChirpParams{
 		Body:   cleanBody,
-		UserID: req.UserID,
+		UserID: userID,
 	})
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Failed to create chirp", err)

@@ -27,11 +27,16 @@ func main() {
 	if platform == "" {
 		log.Fatal("PLATFORM must be set")
 	}
+	secret := os.Getenv("SECRET")
+	if secret == "" {
+		log.Fatal("SECRET must be set")
+	}
 
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
 		log.Fatalf("Failed to connect to the database: %v", err)
 	}
+
 	defer db.Close()
 	dbQueries := database.New(db)
 
@@ -39,6 +44,7 @@ func main() {
 		db:             dbQueries,
 		platform:       platform,
 		fileserverHits: atomic.Int32{},
+		secret:         secret,
 	}
 	mux := http.NewServeMux()
 
