@@ -61,6 +61,8 @@ func main() {
 	mux.HandleFunc("GET "+apiRoute+"chirps/{chirpID}", apiCfg.handlerChirpGet)
 
 	mux.HandleFunc("POST "+apiRoute+"login", apiCfg.loginHandler)
+	mux.HandleFunc("POST "+apiRoute+"refresh", apiCfg.refreshHandler)
+	mux.HandleFunc("POST "+apiRoute+"revoke", apiCfg.revokeHandler)
 
 	// Admin routes
 	mux.HandleFunc("POST "+adminRoute+"reset", apiCfg.handlerReset)
