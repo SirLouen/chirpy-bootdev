@@ -30,8 +30,8 @@ type RefreshToken struct {
 
 type User struct {
 	ID             uuid.UUID
-	CreatedAt      sql.NullTime
-	UpdatedAt      sql.NullTime
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
 	Email          string
 	HashedPassword string
 }

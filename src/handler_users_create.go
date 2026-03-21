@@ -49,8 +49,8 @@ func (cfg *apiConfig) handlerUsersCreate(w http.ResponseWriter, r *http.Request)
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(User{
 		ID:        user.ID,
-		CreatedAt: user.CreatedAt.Time,
-		UpdatedAt: user.UpdatedAt.Time,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
 		Email:     user.Email,
 	})
 }
