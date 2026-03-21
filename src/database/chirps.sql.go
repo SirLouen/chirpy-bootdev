@@ -51,7 +51,8 @@ func (q *Queries) DeleteAllChirps(ctx context.Context) error {
 }
 
 const deleteChirp = `-- name: DeleteChirp :exec
-DELETE FROM chirps WHERE id = $1
+DELETE FROM chirps 
+WHERE id = $1
 `
 
 func (q *Queries) DeleteChirp(ctx context.Context, id uuid.UUID) error {
@@ -60,7 +61,8 @@ func (q *Queries) DeleteChirp(ctx context.Context, id uuid.UUID) error {
 }
 
 const getAllChirps = `-- name: GetAllChirps :many
-SELECT id, created_at, updated_at, body, user_id FROM chirps ORDER BY created_at ASC
+SELECT id, created_at, updated_at, body, user_id FROM chirps 
+ORDER BY created_at ASC
 `
 
 func (q *Queries) GetAllChirps(ctx context.Context) ([]Chirp, error) {
@@ -93,7 +95,8 @@ func (q *Queries) GetAllChirps(ctx context.Context) ([]Chirp, error) {
 }
 
 const getChirpByID = `-- name: GetChirpByID :one
-SELECT id, created_at, updated_at, body, user_id FROM chirps WHERE id = $1
+SELECT id, created_at, updated_at, body, user_id FROM chirps 
+WHERE id = $1
 `
 
 func (q *Queries) GetChirpByID(ctx context.Context, id uuid.UUID) (Chirp, error) {
@@ -110,7 +113,9 @@ func (q *Queries) GetChirpByID(ctx context.Context, id uuid.UUID) (Chirp, error)
 }
 
 const getChirpsByAuthor = `-- name: GetChirpsByAuthor :many
-SELECT id, created_at, updated_at, body, user_id FROM chirps WHERE user_id = $1 ORDER BY created_at ASC
+SELECT id, created_at, updated_at, body, user_id FROM chirps 
+WHERE user_id = $1 
+ORDER BY created_at ASC
 `
 
 func (q *Queries) GetChirpsByAuthor(ctx context.Context, userID uuid.UUID) ([]Chirp, error) {
